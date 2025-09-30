@@ -1,0 +1,36 @@
+GET http://localhost:5067/games
+
+###
+
+GET http://localhost:5067/games/4
+
+###
+
+POST http://localhost:5067/games
+Content-Type: application/json
+
+{
+    "Name": "Super Mario II",
+    "Genre": "Family",
+    "Price": 29.99,
+    "ReleaseDate": "1998-08-25"
+}
+
+###
+
+PUT http://localhost:5067/games/2
+Content-Type: application/json
+
+{
+    "Id": 3,
+    "Name": "Temple run",
+    "Genre": "Adventure",
+    "Price": 17.99,
+    "ReleaseDate": "2001-04-13"
+}
+
+####
+
+DELETE  http://localhost:5067/games/2
+
+
