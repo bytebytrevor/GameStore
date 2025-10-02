@@ -33,7 +33,7 @@ public static class GameEndpoints
 
     public static RouteGroupBuilder MapGamesEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("games");
+        var group = app.MapGroup("games").WithParameterValidation();
 
         // GET /games/
         group.MapGet("/", () => games);
@@ -72,11 +72,6 @@ public static class GameEndpoints
         // POST /games/
         group.MapPost("/", (CreateGameDto newGame) =>
         {
-            // if (string.IsNullOrEmpty(newGame.Name))
-            // {
-            //     return Results.BadRequest("Name field is required");
-            // }
-
             GameDto game = new(
                 games.Count + 1,
                 newGame.Name,
@@ -87,7 +82,7 @@ public static class GameEndpoints
             games.Add(game);
 
             return Results.CreatedAtRoute(GetGameEndpointName, new { id = game.Id }, game);
-        }).WithParameterValidation();
+        });
 
         // DELETE /games/id
         group.MapDelete("/{id}", (int id) =>

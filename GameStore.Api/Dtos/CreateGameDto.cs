@@ -11,7 +11,7 @@ public record class CreateGameDto(
     [StringLength(20, ErrorMessage = "{0} cannot exceed {1} characters")]
     string Genre,
 
-    [Range(1, 100, ErrorMessage = "{0} range should be between {1} and {2} inclusive")]
+    [Range(1, 100, ErrorMessage = "{0} range should be between {1} and {2}")]
     decimal Price,
 
     DateOnly ReleaseDate);
