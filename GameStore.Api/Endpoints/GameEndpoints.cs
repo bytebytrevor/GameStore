@@ -1,93 +1,78 @@
 using System;
+using GameStore.Api.Data;
 using GameStore.Api.Dtos;
+using GameStore.Api.Entities;
+using GameStore.Api.Mapping;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameStore.Api.Endpoints;
 
 public static class GameEndpoints
 {
-    private static string GetGameEndpointName = "GetGame";
+    const string GetGameEndpointName = "GetGame";
 
-    private static List<GameDto> games = [
-        new(
-            1,
-            "Batman Arkam City",
-            "Superhero",
-            19.99M,
-            new DateOnly(1990, 12, 24)
-        ),
-        new(
-            2,
-            "Lost",
-            "Adventure",
-            29.99M,
-            new DateOnly(1998, 06, 13)
-        ),
-        new(
-            3,
-            "John Wick",
-            "Fighting",
-            68.99M,
-            new DateOnly(1990, 12, 24)
-        )
-    ];    
 
     public static RouteGroupBuilder MapGamesEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("games").WithParameterValidation();
 
         // GET /games/
-        group.MapGet("/", () => games);
+        group.MapGet("/", async (GameStoreContext dbContext) =>
+            await dbContext.Games
+                .Include(game => game.Genre)
+                .Select(Game => Game.ToSummaryDto())
+                .AsNoTracking()
+                .ToListAsync());
 
         // GET /games/id
-        group.MapGet("/{id}", (int id) =>
+        group.MapGet("/{id}", async (int id, GameStoreContext dbContext) =>
         {
-            var game = games.Find(game => game.Id == id);
+            Game? game = await dbContext.Games.FindAsync(id);
 
-            if (game is null)
+
+            return game is null ?
+                Results.NotFound() : Results.Ok(game.ToDetailsDto());
+
+        }).WithName(GetGameEndpointName);
+
+        // PUT/games/id
+        group.MapPut("/{id}", async (int id, UpdateGameDto updatedGame, GameStoreContext dbContext) =>
+        {
+            var existingGame = await dbContext.Games.FindAsync(id);
+
+            if (existingGame is null)
             {
                 return Results.NotFound();
             }
 
-            return Results.Ok(game);
-        }).WithName(GetGameEndpointName);
+            dbContext.Entry(existingGame)
+                .CurrentValues
+                .SetValues(updatedGame.ToEntity(id));
 
-        // PUT/games/id
-        group.MapPut("/{id}", (int id, UpdateGameDto updatedGame) =>
-        {
-            int index = games.FindIndex(game => game.Id == id);
-
-            if (index == -1)
-                return Results.NotFound();
-
-            games[index] = new GameDto(
-                updatedGame.Id,
-                updatedGame.Name,
-                updatedGame.Genre,
-                updatedGame.Price,
-                updatedGame.ReleaseDate);
+            await dbContext.SaveChangesAsync();
 
             return Results.NoContent();
         });
 
         // POST /games/
-        group.MapPost("/", (CreateGameDto newGame) =>
+        group.MapPost("/", async (CreateGameDto newGame, GameStoreContext dbContext) =>
         {
-            GameDto game = new(
-                games.Count + 1,
-                newGame.Name,
-                newGame.Genre,
-                newGame.Price,
-                newGame.ReleaseDate);
+            Game game = GameMapping.ToEntity(newGame);
+            dbContext.Games.Add(game);
 
-            games.Add(game);
+            await dbContext.SaveChangesAsync();
 
-            return Results.CreatedAtRoute(GetGameEndpointName, new { id = game.Id }, game);
+            return Results.CreatedAtRoute(
+                GetGameEndpointName,
+                new { id = game.Id },
+                game.ToDetailsDto());
         });
 
         // DELETE /games/id
-        group.MapDelete("/{id}", (int id) =>
+        group.MapDelete("/{id}", async (int id, GameStoreContext dbContext) =>
         {
-            games.RemoveAll(game => game.Id == id);
+            await dbContext.Games.Where(game => game.Id == id)
+                .ExecuteDeleteAsync();
 
             return Results.NoContent();
         });

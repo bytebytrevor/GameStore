@@ -2,7 +2,7 @@ GET http://localhost:5067/games
 
 ###
 
-GET http://localhost:5067/games/4
+GET http://localhost:5067/games/2
 
 ###
 
@@ -10,28 +10,27 @@ POST http://localhost:5067/games
 Content-Type: application/json
 
 {
-    "Name": "Super Mario II",
-    "Genre": "Family",
-    "Price": 29.99,
-    "ReleaseDate": "1998-08-25"
+    "Name": "Mortal Kombat",
+    "GenreId": 1,
+    "Price": 80.99,
+    "ReleaseDate": "1980-03-13"
 }
 
 ###
-PUT http://localhost:5067/games/1
+PUT http://localhost:5067/games/2
 Content-Type: application/json
 
-{
-    
-    "Id": 1,
-    "Name": "Temple run",
-    "Genre": "Adventure",
-    "Price": 17.99,
-    "ReleaseDate": "2001-04-13"
+{    
+    "Id": 2,
+    "Name": "John Wick",
+    "GenreId": 1,
+    "Price": 99.99,
+    "ReleaseDate": "2022-09-19"
 }
 
 ####
 
-DELETE  http://localhost:5067/games/2
+DELETE  http://localhost:5067/games/4
 
 ###
 
