@@ -2,7 +2,7 @@ GET http://localhost:5067/games
 
 ###
 
-GET http://localhost:5067/games/2
+GET http://localhost:5067/games/1
 
 ###
 
@@ -30,7 +30,7 @@ Content-Type: application/json
 
 ####
 
-DELETE  http://localhost:5067/games/4
+DELETE  http://localhost:5067/games/1
 
 ###
 
